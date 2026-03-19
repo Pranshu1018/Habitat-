@@ -42,16 +42,17 @@ app.use(helmet());
 app.use(compression());
 
 // CORS configuration
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:8081', 'http://127.0.0.1:55056'];
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || ['http://localhost:5173', 'http://localhost:8080', 'http://localhost:8081', 'http://localhost:3000', 'http://127.0.0.1:8081', 'http://127.0.0.1:5173'];
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, Render health checks)
     if (!origin) return callback(null, true);
 
-    // Allow any vercel.app subdomain automatically
+    // Allow any vercel.app or localhost subdomain automatically
     const isVercel = /^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin);
+    const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
 
-    if (isVercel || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+    if (isVercel || isLocalhost || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
       callback(null, true);
     } else {
       console.log('CORS blocked origin:', origin);
