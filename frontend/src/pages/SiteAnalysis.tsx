@@ -58,12 +58,16 @@ const SiteAnalysis = () => {
     try {
       const response = await siteAPI.analyze({
         lat: parseFloat(latitude),
-        lon: parseFloat(longitude),
+        lng: parseFloat(longitude),
         name: siteName || 'Unnamed Site',
         hectares: parseInt(hectares) || 1000
       });
 
-      setSiteData(response);
+      // Normalize backend field names
+      setSiteData({
+        ...response,
+        suitabilityScore: response.suitabilityScore ?? response.landScore ?? 0,
+      });
       toast.success('Site analysis completed!');
     } catch (error) {
       console.error('Analysis error:', error);
@@ -436,6 +440,9 @@ const SiteAnalysis = () => {
                       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                         <Sun className="w-5 h-5 text-yellow-500" />
                         Weather Conditions
+                        {siteData.weather?.source && (
+                          <span className="ml-auto text-xs text-gray-400 font-normal">{siteData.weather.source}</span>
+                        )}
                       </h3>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
@@ -485,6 +492,9 @@ const SiteAnalysis = () => {
                       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                         <Leaf className="w-5 h-5 text-green-600" />
                         Soil & Vegetation
+                        {siteData.soil?.source && (
+                          <span className="ml-auto text-xs text-gray-400 font-normal">{siteData.soil.source}</span>
+                        )}
                       </h3>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
