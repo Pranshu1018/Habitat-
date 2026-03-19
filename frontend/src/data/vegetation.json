@@ -1,0 +1,69 @@
+{
+  "data": [
+    {
+      "lat": 1.37,
+      "lng": 32.29,
+      "vegetationIndex": 0.34,
+      "landType": "degraded",
+      "forestCover": 15,
+      "grassCover": 45,
+      "bareSoil": 40,
+      "degradationLevel": "moderate",
+      "regenerationPotential": 0.67,
+      "erosionRisk": "medium"
+    },
+    {
+      "lat": -0.23,
+      "lng": 34.45,
+      "vegetationIndex": 0.72,
+      "landType": "semi_forest",
+      "forestCover": 45,
+      "grassCover": 40,
+      "bareSoil": 15,
+      "degradationLevel": "low",
+      "regenerationPotential": 0.89,
+      "erosionRisk": "low"
+    },
+    {
+      "lat": 1.05,
+      "lng": 31.15,
+      "vegetationIndex": 0.18,
+      "landType": "severely_degraded",
+      "forestCover": 5,
+      "grassCover": 25,
+      "bareSoil": 70,
+      "degradationLevel": "severe",
+      "regenerationPotential": 0.42,
+      "erosionRisk": "high"
+    },
+    {
+      "lat": 2.15,
+      "lng": 33.75,
+      "vegetationIndex": 0.56,
+      "landType": "grassland",
+      "forestCover": 20,
+      "grassCover": 60,
+      "bareSoil": 20,
+      "degradationLevel": "low",
+      "regenerationPotential": 0.78,
+      "erosionRisk": "low"
+    },
+    {
+      "lat": 0.52,
+      "lng": 35.28,
+      "vegetationIndex": 0.12,
+      "landType": "desertified",
+      "forestCover": 2,
+      "grassCover": 18,
+      "bareSoil": 80,
+      "degradationLevel": "severe",
+      "regenerationPotential": 0.31,
+      "erosionRisk": "very_high"
+    }
+  ],
+  "metadata": {
+    "source": "Sentinel-2 NDVI Simulation",
+    "last_updated": "2024-01-15",
+    "resolution": "10m"
+  }
+}

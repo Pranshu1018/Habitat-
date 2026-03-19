@@ -1,0 +1,278 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ── DARK THEME (default) ── */
+  :root,
+  .dark {
+    --background: 160 18% 7%;
+    --foreground: 150 15% 92%;
+
+    --card: 160 16% 10%;
+    --card-foreground: 150 15% 92%;
+
+    --popover: 160 16% 10%;
+    --popover-foreground: 150 15% 92%;
+
+    --primary: 152 60% 42%;
+    --primary-foreground: 160 18% 7%;
+
+    --secondary: 160 14% 16%;
+    --secondary-foreground: 150 15% 80%;
+
+    --muted: 160 12% 14%;
+    --muted-foreground: 150 10% 52%;
+
+    --accent: 168 55% 38%;
+    --accent-foreground: 160 18% 7%;
+
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 38 92% 52%;
+    --warning-foreground: 38 92% 10%;
+
+    --success: 142 65% 45%;
+    --success-foreground: 142 65% 10%;
+
+    --border: 160 12% 18%;
+    --input: 160 12% 18%;
+    --ring: 152 60% 42%;
+
+    --radius: 0.875rem;
+
+    --chart-green: 152 60% 42%;
+    --chart-blue: 210 70% 55%;
+    --chart-amber: 38 92% 52%;
+    --chart-earth: 25 45% 48%;
+    --chart-sage: 140 35% 55%;
+
+    --sidebar-background: 160 18% 8%;
+    --sidebar-foreground: 150 15% 85%;
+    --sidebar-primary: 152 60% 42%;
+    --sidebar-primary-foreground: 160 18% 7%;
+    --sidebar-accent: 160 14% 14%;
+    --sidebar-accent-foreground: 150 15% 80%;
+    --sidebar-border: 160 12% 16%;
+    --sidebar-ring: 152 60% 42%;
+
+    /* Glass surface tokens */
+    --glass-bg: rgba(18, 28, 22, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --glass-inset: inset 0 1px 0 rgba(255,255,255,0.05);
+    --glass-hover-border: rgba(255, 255, 255, 0.1);
+    --glass-hover-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+
+    /* Surface overlays */
+    --surface-1: rgba(14, 22, 18, 0.8);
+    --surface-2: rgba(18, 28, 22, 0.6);
+    --surface-3: rgba(8, 16, 12, 0.6);
+
+    /* Text tokens */
+    --text-primary: rgba(255, 255, 255, 0.92);
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --text-muted: rgba(255, 255, 255, 0.35);
+
+    /* Header */
+    --header-bg: rgba(10, 18, 14, 0.85);
+    --header-border: rgba(255, 255, 255, 0.06);
+  }
+
+  /* ── LIGHT THEME ── */
+  .light {
+    --background: 150 30% 97%;
+    --foreground: 160 25% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 160 25% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 160 25% 12%;
+
+    --primary: 152 55% 36%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 150 20% 92%;
+    --secondary-foreground: 160 25% 20%;
+
+    --muted: 150 15% 93%;
+    --muted-foreground: 160 12% 45%;
+
+    --accent: 168 50% 34%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 38 90% 45%;
+    --warning-foreground: 0 0% 100%;
+
+    --success: 142 60% 38%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 150 15% 86%;
+    --input: 150 15% 86%;
+    --ring: 152 55% 36%;
+
+    --chart-green: 152 55% 36%;
+    --chart-blue: 210 65% 48%;
+    --chart-amber: 38 90% 45%;
+    --chart-earth: 25 42% 42%;
+    --chart-sage: 140 32% 48%;
+
+    --sidebar-background: 150 25% 95%;
+    --sidebar-foreground: 160 25% 15%;
+    --sidebar-primary: 152 55% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 150 20% 90%;
+    --sidebar-accent-foreground: 160 25% 20%;
+    --sidebar-border: 150 15% 88%;
+    --sidebar-ring: 152 55% 36%;
+
+    /* Glass surface tokens */
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(0, 0, 0, 0.07);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    --glass-inset: inset 0 1px 0 rgba(255,255,255,0.9);
+    --glass-hover-border: rgba(0, 0, 0, 0.12);
+    --glass-hover-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+
+    /* Surface overlays */
+    --surface-1: rgba(255, 255, 255, 0.9);
+    --surface-2: rgba(248, 252, 250, 0.8);
+    --surface-3: rgba(240, 248, 244, 0.7);
+
+    /* Text tokens */
+    --text-primary: rgba(15, 30, 20, 0.92);
+    --text-secondary: rgba(15, 30, 20, 0.6);
+    --text-muted: rgba(15, 30, 20, 0.38);
+
+    /* Header */
+    --header-bg: rgba(248, 252, 250, 0.9);
+    --header-border: rgba(0, 0, 0, 0.07);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), var(--glass-inset);
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300;
+  }
+
+  .glass-card-hover:hover {
+    border-color: var(--glass-hover-border);
+    box-shadow: var(--glass-hover-shadow), var(--glass-inset);
+    transform: translateY(-2px);
+  }
+
+  .glow-button {
+    @apply relative overflow-hidden transition-all duration-300;
+  }
+
+  .glow-button::before {
+    content: '';
+    @apply absolute inset-0 blur-xl opacity-0 transition-opacity duration-300;
+    background: hsl(var(--primary) / 0.25);
+  }
+
+  .glow-button:hover::before {
+    @apply opacity-100;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  .stat-card {
+    background: var(--surface-1);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .nav-pill {
+    @apply px-4 py-2 rounded-full text-sm font-medium transition-all duration-200;
+  }
+
+  .nav-pill-active {
+    background: hsl(var(--primary) / 0.15);
+    color: hsl(var(--primary));
+    border: 1px solid hsl(var(--primary) / 0.3);
+  }
+
+  .metric-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 2px;
+  }
+
+  .border-glow {
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.4), 0 0 20px hsl(var(--primary) / 0.15);
+  }
+}
+
+/* ── Mapbox popup theme overrides ─────────────────────────────────────────── */
+.mapboxgl-popup-content {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25) !important;
+  padding: 0 !important;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: hsl(var(--card)) !important;
+  border-bottom-color: hsl(var(--card)) !important;
+}
+
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
+  border-top-color: hsl(var(--card)) !important;
+}
+
+.mapboxgl-popup-anchor-top .mapboxgl-popup-tip {
+  border-bottom-color: hsl(var(--card)) !important;
+}

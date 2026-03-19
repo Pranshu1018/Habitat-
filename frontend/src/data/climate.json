@@ -1,0 +1,74 @@
+{
+  "data": [
+    {
+      "lat": 1.37,
+      "lng": 32.29,
+      "avgTemp": 29,
+      "minTemp": 22,
+      "maxTemp": 35,
+      "rainfall": 820,
+      "rainfallSeason": "bimodal",
+      "droughtRisk": "medium",
+      "humidity": 65,
+      "growingSeason": 240,
+      "frostDays": 0
+    },
+    {
+      "lat": -0.23,
+      "lng": 34.45,
+      "avgTemp": 26,
+      "minTemp": 19,
+      "maxTemp": 32,
+      "rainfall": 1200,
+      "rainfallSeason": "long",
+      "droughtRisk": "low",
+      "humidity": 75,
+      "growingSeason": 300,
+      "frostDays": 0
+    },
+    {
+      "lat": 1.05,
+      "lng": 31.15,
+      "avgTemp": 31,
+      "minTemp": 24,
+      "maxTemp": 38,
+      "rainfall": 650,
+      "rainfallSeason": "short",
+      "droughtRisk": "high",
+      "humidity": 55,
+      "growingSeason": 180,
+      "frostDays": 0
+    },
+    {
+      "lat": 2.15,
+      "lng": 33.75,
+      "avgTemp": 28,
+      "minTemp": 21,
+      "maxTemp": 34,
+      "rainfall": 950,
+      "rainfallSeason": "bimodal",
+      "droughtRisk": "low",
+      "humidity": 70,
+      "growingSeason": 270,
+      "frostDays": 0
+    },
+    {
+      "lat": 0.52,
+      "lng": 35.28,
+      "avgTemp": 33,
+      "minTemp": 26,
+      "maxTemp": 40,
+      "rainfall": 450,
+      "rainfallSeason": "short",
+      "droughtRisk": "very_high",
+      "humidity": 45,
+      "growingSeason": 150,
+      "frostDays": 0
+    }
+  ],
+  "metadata": {
+    "source": "WorldClim API Simulation",
+    "last_updated": "2024-01-15",
+    "resolution": "1km"
+  }
+}

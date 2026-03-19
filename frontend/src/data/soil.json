@@ -1,0 +1,69 @@
+{
+  "data": [
+    {
+      "lat": 1.37,
+      "lng": 32.29,
+      "ph": 6.2,
+      "nitrogen": "low",
+      "phosphorus": "medium",
+      "potassium": "high",
+      "organic_matter": 2.1,
+      "texture": "loamy",
+      "drainage": "good",
+      "depth": 120
+    },
+    {
+      "lat": -0.23,
+      "lng": 34.45,
+      "ph": 5.8,
+      "nitrogen": "medium",
+      "phosphorus": "low",
+      "potassium": "medium",
+      "organic_matter": 1.8,
+      "texture": "sandy_loam",
+      "drainage": "moderate",
+      "depth": 90
+    },
+    {
+      "lat": 1.05,
+      "lng": 31.15,
+      "ph": 6.5,
+      "nitrogen": "high",
+      "phosphorus": "medium",
+      "potassium": "high",
+      "organic_matter": 2.8,
+      "texture": "clay_loam",
+      "drainage": "moderate",
+      "depth": 150
+    },
+    {
+      "lat": 2.15,
+      "lng": 33.75,
+      "ph": 7.1,
+      "nitrogen": "medium",
+      "phosphorus": "high",
+      "potassium": "medium",
+      "organic_matter": 2.3,
+      "texture": "silty_clay",
+      "drainage": "poor",
+      "depth": 110
+    },
+    {
+      "lat": 0.52,
+      "lng": 35.28,
+      "ph": 5.5,
+      "nitrogen": "low",
+      "phosphorus": "low",
+      "potassium": "low",
+      "organic_matter": 1.2,
+      "texture": "sandy",
+      "drainage": "excellent",
+      "depth": 80
+    }
+  ],
+  "metadata": {
+    "source": "SoilGrids API Simulation",
+    "last_updated": "2024-01-15",
+    "resolution": "1km"
+  }
+}

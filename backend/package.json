@@ -1,0 +1,35 @@
+{
+  "name": "habitat-backend",
+  "version": "1.0.0",
+  "description": "Habitat Platform Backend API",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "reforestation",
+    "api",
+    "environment"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.6.2",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "groq-sdk": "^1.1.1",
+    "helmet": "^7.1.0",
+    "node-cache": "^5.1.2",
+    "twilio": "^5.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
