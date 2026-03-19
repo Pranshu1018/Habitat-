@@ -76,9 +76,45 @@ const SiteAnalysisComplete = () => {
       const res = (raw as any)?.data ?? raw;
       const d: SiteData = {
         location: { lat: selected.lat, lon: selected.lon, name: selected.name },
-        satellite: { ndvi: res.vegetation?.ndvi || 0.45, landCover: (res.vegetation?.coverage || 0) > 50 ? 'Moderate Forest' : 'Degraded Land', degradationLevel: (res.vegetation?.healthScore || 0) < 50 ? 'High' : (res.vegetation?.healthScore || 0) < 70 ? 'Medium' : 'Low', priority: (res.landScore || 0) > 70 ? 'high' : (res.landScore || 0) > 50 ? 'medium' : 'low' },
-        soil: { ph: res.soil?.ph || 6.5, nitrogen: res.soil?.nitrogen || 'medium', phosphorus: res.soil?.phosphorus || 'low', moisture: res.soil?.moisture || 60, texture: 'Loamy' },
-        climate: { rainfall: 1200, temperature: res.weather?.current?.temp || 24, seasonality: 'Monsoon' },
+        satellite: {
+          ndvi: res.vegetation?.ndvi || 0.45,
+          landCover: (res.vegetation?.coverage || 0) > 60 ? 'Dense Forest' : (res.vegetation?.coverage || 0) > 35 ? 'Moderate Forest' : 'Degraded Land',
+          degradationLevel: (res.vegetation?.healthScore || 0) < 40 ? 'High' : (res.vegetation?.healthScore || 0) < 65 ? 'Medium' : 'Low',
+          priority: (res.landScore || 0) > 70 ? 'high' : (res.landScore || 0) > 50 ? 'medium' : 'low'
+        },
+        soil: {
+          ph: res.soil?.ph || 6.5,
+          nitrogen: res.soil?.nitrogen || 'medium',
+          phosphorus: res.soil?.phosphorus || 'low',
+          moisture: res.soil?.moisture || 60,
+          texture: res.soil?.texture || 'Loam'
+        },
+        climate: {
+          rainfall: (() => {
+            // Derive annual rainfall estimate from precipitation + humidity
+            const precip = res.weather?.current?.precipitation || 0;
+            const humidity = res.weather?.current?.humidity || 60;
+            // precip is hourly mm; scale to annual using humidity as proxy
+            if (precip > 0) return Math.round(precip * 24 * 120); // ~120 rainy days
+            // fallback: humidity-based estimate
+            if (humidity > 80) return Math.round(1800 + (humidity - 80) * 30);
+            if (humidity > 65) return Math.round(900 + (humidity - 65) * 60);
+            if (humidity > 50) return Math.round(400 + (humidity - 50) * 33);
+            return 300;
+          })(),
+          temperature: res.weather?.current?.temp || 24,
+          seasonality: (() => {
+            const temp = res.weather?.current?.temp || 24;
+            const humidity = res.weather?.current?.humidity || 60;
+            const lat = selected.lat;
+            if (Math.abs(lat) < 10 && humidity > 78) return 'Equatorial';
+            if (Math.abs(lat) < 23.5 && humidity > 70) return 'Monsoon';
+            if (Math.abs(lat) < 23.5 && humidity < 45) return 'Arid';
+            if (Math.abs(lat) < 35 && temp > 28) return 'Tropical Dry';
+            if (Math.abs(lat) > 35) return 'Temperate';
+            return 'Sub-tropical';
+          })()
+        },
         species: (res.recommendedSpecies?.slice(0, 3) || []).map((s: any) => ({ name: s.name, scientificName: s.scientificName, survivalProbability: s.survivalProbability, reason: s.reason, careRequirements: s.uses || ['Moderate watering', 'Full sunlight'], imageUrl: SPECIES_IMAGES[s.name] || SPECIES_IMAGES['Teak'] })),
         suitabilityScore: res.landScore || 75,
       };
