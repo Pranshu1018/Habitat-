@@ -1,19 +1,35 @@
 import Groq from 'groq-sdk';
 import axios from 'axios';
 
-const SYSTEM_PROMPT = `You are an expert forest and reforestation AI assistant for the Habitat platform.
-You specialize in:
-- Forest health assessment and monitoring
-- Reforestation planning and species selection
-- Soil analysis and improvement strategies
-- Climate risk assessment for forests
-- NDVI and vegetation health interpretation
-- Carbon sequestration calculations
-- Biodiversity and ecological restoration
+const SYSTEM_PROMPT = `You are an expert forest and reforestation AI assistant for the Habitat platform, specializing in Indian native tree species and tropical/subtropical ecosystems.
 
-When given environmental data (weather, soil, vegetation), provide specific, actionable insights.
-Keep responses concise, practical, and data-driven. Use metric units.
-If data is unavailable, provide general best-practice guidance for Indian forest ecosystems.`;
+CORE EXPERTISE:
+- Indian native tree species (Sal, Teak, Neem, Bamboo, Arjun, etc.)
+- Tropical and subtropical forest ecosystems
+- Soil-climate-species matching for Indian conditions
+- Regional forest types (Western Ghats, Central India, Arid zones, Himalayan foothills)
+- Monsoon-dependent reforestation strategies
+- Carbon sequestration in Indian species
+- Forest Survey of India guidelines
+
+RESPONSE GUIDELINES:
+1. ALWAYS analyze the provided site data carefully (temperature, pH, NDVI)
+2. Base ALL recommendations on the SPECIFIC parameters given
+3. Different parameters = Different species recommendations
+4. Explain WHY each species is suitable for THESE specific conditions
+5. Consider Indian monsoon patterns, soil types, and climate zones
+6. Mention survival rates, growth rates, and care requirements
+7. Be specific and technical, not generic
+
+CRITICAL: Never give the same recommendations for different site conditions. 
+Temperature 30°C + pH 6.8 is VERY different from Temperature 25°C + pH 4.8.
+
+When recommending species, explain:
+- Why this temperature range suits the species
+- Why this pH level is compatible
+- How NDVI indicates restoration potential
+- Expected survival rate for THESE specific conditions
+- Specific care needs for THIS site`;
 
 class GroqChatService {
   constructor() {
@@ -49,17 +65,40 @@ class GroqChatService {
 
   buildContextBlock(ctx) {
     const lines = [];
+    
     if (ctx.weather?.current) {
       const c = ctx.weather.current;
-      lines.push(`WEATHER: Temp ${c.temp}°C, Humidity ${c.humidity}%, Precip ${c.precipitation}mm, Wind ${c.windSpeed}m/s`);
+      lines.push(`CURRENT WEATHER:`);
+      lines.push(`- Temperature: ${c.temp}°C`);
+      lines.push(`- Humidity: ${c.humidity}%`);
+      lines.push(`- Precipitation: ${c.precipitation}mm/day`);
+      lines.push(`- Wind Speed: ${c.windSpeed}m/s`);
     }
+    
     if (ctx.soil) {
-      lines.push(`SOIL: pH ${ctx.soil.ph}, Moisture ${ctx.soil.moisture}%, OC ${ctx.soil.organicCarbon}g/kg, N ${ctx.soil.nitrogen}`);
+      lines.push(`\nSOIL CONDITIONS:`);
+      lines.push(`- pH: ${ctx.soil.ph} (${ctx.soil.ph < 6 ? 'Acidic' : ctx.soil.ph > 7 ? 'Alkaline' : 'Neutral'})`);
+      lines.push(`- Moisture: ${ctx.soil.moisture}%`);
+      lines.push(`- Organic Carbon: ${ctx.soil.organicCarbon}g/kg`);
+      lines.push(`- Nitrogen: ${ctx.soil.nitrogen}`);
+      lines.push(`- Texture: ${ctx.soil.texture}`);
     }
+    
     if (ctx.vegetation) {
-      lines.push(`VEGETATION: NDVI ${ctx.vegetation.ndvi}, Health ${ctx.vegetation.healthScore}%, Coverage ${ctx.vegetation.coverage}%`);
+      lines.push(`\nVEGETATION ANALYSIS:`);
+      lines.push(`- NDVI: ${ctx.vegetation.ndvi} (${ctx.vegetation.ndvi < 0.3 ? 'Degraded' : ctx.vegetation.ndvi < 0.6 ? 'Moderate' : 'Dense vegetation'})`);
+      lines.push(`- Health Score: ${ctx.vegetation.healthScore}%`);
+      lines.push(`- Coverage: ${ctx.vegetation.coverage}%`);
+      lines.push(`- Change Rate: ${ctx.vegetation.changeRate}%/month`);
     }
-    return lines.length ? `Current site data:\n${lines.join('\n')}\n\n` : '';
+    
+    if (lines.length) {
+      lines.unshift(`===== SITE-SPECIFIC DATA FOR THIS LOCATION =====`);
+      lines.push(`\n=================================================`);
+      lines.push(`\nUSER QUESTION:`);
+    }
+    
+    return lines.join('\n');
   }
 
   async chat(userMessage, location) {

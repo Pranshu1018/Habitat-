@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Satellite, Loader2, ArrowLeft, ArrowRight, CheckCircle2,
-  TreePine, Leaf, Sun, Activity, Info, Save, Download
+  TreePine, Leaf, Sun, Activity, Info, Save, Download,
+  ChevronDown, ChevronUp, Wifi, WifiOff, Bot, Database, Check, X
 } from 'lucide-react';
 import SpeciesSuitabilityMap from '@/components/SpeciesSuitabilityMap';
 import { Input } from '@/components/ui/input';
@@ -14,10 +15,16 @@ import { projectService, analysisService } from '@/services/database/projectServ
 interface SiteData {
   location: { lat: number; lon: number; name: string };
   satellite: { ndvi: number; landCover: string; degradationLevel: string; priority: 'high' | 'medium' | 'low' };
-  soil: { ph: number; nitrogen: string; phosphorus: string; moisture: number; texture: string };
-  climate: { rainfall: number; temperature: number; seasonality: string };
-  species: Array<{ name: string; scientificName: string; survivalProbability: number; reason: string; careRequirements: string[]; imageUrl: string }>;
+  soil: { ph: number; nitrogen: string; phosphorus: string; moisture: number; texture: string; source?: string; confidence?: number };
+  climate: { rainfall: number; temperature: number; seasonality: string; source?: string; confidence?: number };
+  species: Array<{ name: string; scientificName: string; survivalProbability: number; reason: string; careRequirements: string[]; imageUrl: string; source?: string }>;
   suitabilityScore: number;
+  apiWorkflow?: {
+    weather: { tried: string[]; succeeded: string | null; failed: string[]; filledByChatbot: boolean };
+    soil: { tried: string[]; succeeded: string | null; failed: string[]; filledByChatbot: boolean };
+    vegetation: { tried: string[]; succeeded: string | null; failed: string[]; filledByChatbot: boolean };
+    species: { source: string; count: number; aiSupplemented: boolean; databaseSpeciesCount: number };
+  };
 }
 
 const LOCATIONS = [
@@ -35,6 +42,24 @@ const SPECIES_IMAGES: Record<string, string> = {
   'Sal': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400',
   'Bamboo': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400',
   'Sandalwood': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+  'Babul': 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=400',
+  'Palash': 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=400',
+  'Arjun': 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=400',
+  'Flame of the Forest / Palash': 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=400',
+  'Deodar Cedar': 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=400',
+  'Rosewood': 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=400',
+  'Jamun': 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=400',
+  'Amla': 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=400',
+  'Khejri': 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=400',
+  'Casuarina': 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=400',
+  'Moringa': 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=400',
+  'Mahua': 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=400',
+  'Indian Gooseberry / Amla': 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=400',
+  'Indian Willow': 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=400',
+  'Chir Pine': 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=400',
+  'Indian Laurel': 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=400',
+  'Coconut Palm': 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400',
+  'Indian Jujube': 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=400',
 };
 
 function getDemoData(location: typeof LOCATIONS[0]): SiteData {
@@ -61,6 +86,7 @@ const SiteAnalysisComplete = () => {
   const [projectName, setProjectName] = useState('');
   const [showSave, setShowSave] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [workflowOpen, setWorkflowOpen] = useState(false);
 
   const runAnalysis = async () => {
     if (!selected) return;
@@ -74,6 +100,7 @@ const SiteAnalysisComplete = () => {
       await new Promise(r => setTimeout(r, 1200));
       const raw = await siteAPI.analyze({ lat: selected.lat, lng: selected.lon, name: selected.name, hectares: 1000 });
       const res = (raw as any)?.data ?? raw;
+      const apiWorkflow = res.apiWorkflow || null;
       const d: SiteData = {
         location: { lat: selected.lat, lon: selected.lon, name: selected.name },
         satellite: {
@@ -87,7 +114,9 @@ const SiteAnalysisComplete = () => {
           nitrogen: res.soil?.nitrogen || 'medium',
           phosphorus: res.soil?.phosphorus || 'low',
           moisture: res.soil?.moisture || 60,
-          texture: res.soil?.texture || 'Loam'
+          texture: res.soil?.texture || 'Loam',
+          source: res.soil?.source,
+          confidence: res.soil?.confidence,
         },
         climate: {
           rainfall: (() => {
@@ -113,10 +142,13 @@ const SiteAnalysisComplete = () => {
             if (Math.abs(lat) < 35 && temp > 28) return 'Tropical Dry';
             if (Math.abs(lat) > 35) return 'Temperate';
             return 'Sub-tropical';
-          })()
+          })(),
+          source: res.weather?.source,
+          confidence: res.weather?.confidence,
         },
-        species: (res.recommendedSpecies?.slice(0, 3) || []).map((s: any) => ({ name: s.name, scientificName: s.scientificName, survivalProbability: s.survivalProbability, reason: s.reason, careRequirements: s.uses || ['Moderate watering', 'Full sunlight'], imageUrl: SPECIES_IMAGES[s.name] || SPECIES_IMAGES['Teak'] })),
+        species: (res.recommendedSpecies?.slice(0, 3) || []).map((s: any) => ({ name: s.commonName || s.name, scientificName: s.scientificName, survivalProbability: s.survivalProbability, reason: s.reason, careRequirements: s.uses || ['Moderate watering', 'Full sunlight'], imageUrl: SPECIES_IMAGES[s.commonName || s.name] || SPECIES_IMAGES['Teak'], source: s.source })),
         suitabilityScore: res.landScore || 75,
+        ...(apiWorkflow ? { apiWorkflow } : {}),
       };
       if (!d.species.length) d.species = getDemoData(selected).species;
       setData(d);
@@ -252,9 +284,9 @@ const SiteAnalysisComplete = () => {
               <div className="text-center">
                 <h3 className="text-xl font-bold text-foreground mb-1">{STEPS[step]}</h3>
                 <p className="text-muted-foreground text-sm">
-                  {step === 1 && 'Fetching satellite imagery and analyzing vegetation...'}
-                  {step === 2 && 'Analyzing soil properties and climate patterns...'}
-                  {step === 3 && 'Matching optimal native species for your site...'}
+                  {step === 1 && 'Querying weather & satellite APIs...'}
+                  {step === 2 && 'Analyzing soil data from OpenLandMap, SoilGrids & NASA...'}
+                  {step === 3 && 'Matching species from plant database (20 native species)...'}
                 </p>
               </div>
               <div className="flex gap-2 mt-2">
@@ -289,25 +321,41 @@ const SiteAnalysisComplete = () => {
                 {[
                   {
                     icon: Satellite, label: 'Satellite Analysis', color: 'rgba(100,160,255,0.15)', iconColor: '#7eb8ff',
-                    rows: [['NDVI Index', data.satellite.ndvi.toFixed(3)], ['Land Cover', data.satellite.landCover], ['Degradation', data.satellite.degradationLevel]]
+                    rows: [['NDVI Index', data.satellite.ndvi.toFixed(3)], ['Land Cover', data.satellite.landCover], ['Degradation', data.satellite.degradationLevel]],
+                    source: data.apiWorkflow?.vegetation?.succeeded || 'Satellite',
+                    confidence: data.apiWorkflow?.vegetation ? (data.apiWorkflow.vegetation.succeeded ? 85 : 50) : undefined,
                   },
                   {
                     icon: Activity, label: 'Soil Properties', color: 'rgba(200,150,80,0.12)', iconColor: '#f0b060',
-                    rows: [['pH Level', data.soil.ph.toFixed(1)], ['Moisture', `${data.soil.moisture}%`], ['Texture', data.soil.texture]]
+                    rows: [['pH Level', data.soil.ph.toFixed(1)], ['Moisture', `${data.soil.moisture}%`], ['Texture', data.soil.texture]],
+                    source: data.soil.source,
+                    confidence: data.soil.confidence,
                   },
                   {
                     icon: Sun, label: 'Climate', color: 'rgba(255,220,80,0.1)', iconColor: '#ffd84d',
-                    rows: [['Rainfall', `${data.climate.rainfall} mm`], ['Temperature', `${data.climate.temperature}°C`], ['Pattern', data.climate.seasonality]]
+                    rows: [['Rainfall', `${data.climate.rainfall} mm`], ['Temperature', `${data.climate.temperature}°C`], ['Pattern', data.climate.seasonality]],
+                    source: data.climate.source,
+                    confidence: data.climate.confidence,
                   },
                 ].map(card => (
                   <div key={card.label} className="rounded-2xl p-5" style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}>
-                    <div className="flex items-center gap-3 mb-5">
+                    <div className="flex items-center gap-3 mb-1">
                       <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: card.color }}>
                         <card.icon className="w-4.5 h-4.5" style={{ color: card.iconColor }} size={18} />
                       </div>
-                      <span className="font-semibold text-foreground text-sm">{card.label}</span>
+                      <div>
+                        <span className="font-semibold text-foreground text-sm">{card.label}</span>
+                        {card.source && card.confidence !== undefined && (
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <div className="w-1.5 h-1.5 rounded-full" style={{
+                              background: card.confidence > 80 ? '#4ade80' : card.confidence > 60 ? '#fbbf24' : '#f87171'
+                            }} />
+                            <span className="text-[10px] text-muted-foreground">{card.source} • {card.confidence}% confidence</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-3 mt-4">
                       {card.rows.map(([k, v]) => (
                         <div key={k} className="flex items-center justify-between">
                           <span className="text-xs text-muted-foreground">{k}</span>
@@ -318,6 +366,111 @@ const SiteAnalysisComplete = () => {
                   </div>
                 ))}
               </div>
+
+              {/* API Workflow Audit Trail */}
+              {data.apiWorkflow && (
+                <div className="rounded-2xl overflow-hidden" style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}>
+                  <button
+                    onClick={() => setWorkflowOpen(v => !v)}
+                    className="w-full flex items-center justify-between px-5 py-4 hover:bg-foreground/[0.03] transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(100,160,255,0.1)', border: '1px solid rgba(100,160,255,0.15)' }}>
+                        <Wifi className="w-4 h-4" style={{ color: '#7eb8ff' }} />
+                      </div>
+                      <div className="text-left">
+                        <span className="font-semibold text-foreground text-sm">📡 Data Sources & API Workflow</span>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">View the complete API audit trail</p>
+                      </div>
+                    </div>
+                    {workflowOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                  </button>
+
+                  <AnimatePresence>
+                    {workflowOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-5 pb-5 space-y-3 border-t" style={{ borderColor: 'hsl(var(--border))' }}>
+                          <div className="pt-4 space-y-3">
+                            {([
+                              { key: 'weather' as const, label: 'Weather', icon: Sun, iconColor: '#ffd84d', bgColor: 'rgba(255,220,80,0.1)' },
+                              { key: 'soil' as const, label: 'Soil', icon: Activity, iconColor: '#f0b060', bgColor: 'rgba(200,150,80,0.12)' },
+                              { key: 'vegetation' as const, label: 'Vegetation', icon: Leaf, iconColor: '#4ade80', bgColor: 'rgba(74,222,128,0.1)' },
+                            ] as const).map(row => {
+                              const wf = data.apiWorkflow![row.key];
+                              return (
+                                <div key={row.key} className="rounded-xl p-3.5" style={{ background: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }}>
+                                  <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: row.bgColor }}>
+                                      <row.icon className="w-3.5 h-3.5" style={{ color: row.iconColor }} />
+                                    </div>
+                                    <span className="text-xs font-semibold text-foreground">{row.label}</span>
+                                    {wf.filledByChatbot && (
+                                      <span className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: 'rgba(168,85,247,0.12)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.2)' }}>
+                                        <Bot className="w-3 h-3" /> AI Generated
+                                      </span>
+                                    )}
+                                    {wf.succeeded && !wf.filledByChatbot && (
+                                      <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: 'rgba(74,222,128,0.12)', color: '#4ade80', border: '1px solid rgba(74,222,128,0.2)' }}>
+                                        {wf.succeeded}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {wf.tried.map(api => {
+                                      const didSucceed = wf.succeeded === api;
+                                      const didFail = wf.failed.includes(api);
+                                      return (
+                                        <span key={api} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium" style={{
+                                          background: didSucceed ? 'rgba(74,222,128,0.1)' : didFail ? 'rgba(248,113,113,0.1)' : 'rgba(255,255,255,0.05)',
+                                          color: didSucceed ? '#4ade80' : didFail ? '#f87171' : 'hsl(var(--muted-foreground))',
+                                          border: `1px solid ${didSucceed ? 'rgba(74,222,128,0.2)' : didFail ? 'rgba(248,113,113,0.2)' : 'hsl(var(--border))'}`,
+                                        }}>
+                                          {didSucceed ? <Check className="w-2.5 h-2.5" /> : didFail ? <X className="w-2.5 h-2.5" /> : null}
+                                          {api}
+                                        </span>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              );
+                            })}
+
+                            {/* Species source summary */}
+                            {data.apiWorkflow.species && (
+                              <div className="rounded-xl p-3.5" style={{ background: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }}>
+                                <div className="flex items-center gap-3">
+                                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(45,180,100,0.12)' }}>
+                                    <Database className="w-3.5 h-3.5 text-emerald-400" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <span className="text-xs font-semibold text-foreground">Species</span>
+                                    <p className="text-[10px] text-muted-foreground">
+                                      {data.apiWorkflow.species.count} species from {data.apiWorkflow.species.source}
+                                      {data.apiWorkflow.species.aiSupplemented && ' + AI supplemented'}
+                                      {data.apiWorkflow.species.databaseSpeciesCount > 0 && ` (${data.apiWorkflow.species.databaseSpeciesCount} in database)`}
+                                    </p>
+                                  </div>
+                                  {data.apiWorkflow.species.aiSupplemented && (
+                                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: 'rgba(168,85,247,0.12)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.2)' }}>
+                                      <Bot className="w-3 h-3" /> AI
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
 
               {/* Species */}
               <div className="rounded-2xl p-6" style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}>

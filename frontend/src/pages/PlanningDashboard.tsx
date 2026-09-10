@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   MapPin, Loader2, Save, Zap, CloudRain,
-  Flame, Droplets, Wind, AlertTriangle, Shield, RotateCcw, ChevronDown, ChevronUp
+  Flame, Droplets, Wind, AlertTriangle, Shield, RotateCcw, ChevronDown, ChevronUp,
+  Bot, Database, Wifi
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
@@ -19,6 +20,12 @@ interface Location { lat: number; lng: number; name: string; }
 interface AnalysisResult {
   location: Location; landScore: number; priority: string;
   soil: any; weather: any; vegetation: any; recommendedSpecies: any[];
+  apiWorkflow?: {
+    weather: { tried: string[]; succeeded: string | null; failed: string[]; filledByChatbot: boolean };
+    soil: { tried: string[]; succeeded: string | null; failed: string[]; filledByChatbot: boolean };
+    vegetation: { tried: string[]; succeeded: string | null; failed: string[]; filledByChatbot: boolean };
+    species: { source: string; count: number; aiSupplemented: boolean; databaseSpeciesCount: number };
+  };
 }
 interface SimConds { drought: number; heatWave: number; waterlogging: number; frost: number; strongWinds: number; }
 
@@ -336,20 +343,41 @@ const PlanningDashboard = () => {
                 {/* Metrics row */}
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { label: 'Soil pH', value: result.soil?.ph?.toFixed(1) ?? '—' },
-                    { label: 'Moisture', value: result.soil?.moisture ? `${result.soil.moisture}%` : '—' },
-                    { label: 'Temp', value: result.weather?.current?.temp ? `${result.weather.current.temp}°C` : '—' },
+                    { label: 'Soil pH', value: result.soil?.ph?.toFixed(1) ?? '—', source: result.soil?.source, confidence: result.soil?.confidence },
+                    { label: 'Moisture', value: result.soil?.moisture ? `${result.soil.moisture}%` : '—', source: result.soil?.source, confidence: result.soil?.confidence },
+                    { label: 'Temp', value: result.weather?.current?.temp ? `${result.weather.current.temp}°C` : '—', source: result.weather?.source, confidence: result.weather?.confidence },
                   ].map(m => (
                     <Panel key={m.label} className="p-3 text-center">
                       <p className="text-lg font-bold text-foreground">{m.value}</p>
                       <p className="text-[10px] text-muted-foreground mt-0.5">{m.label}</p>
+                      {m.source && m.confidence !== undefined && (
+                        <div className="flex items-center justify-center gap-1 mt-1">
+                          <div className="w-1.5 h-1.5 rounded-full" style={{
+                            background: m.confidence > 80 ? '#4ade80' : m.confidence > 60 ? '#fbbf24' : '#f87171'
+                          }} />
+                          <span className="text-[9px] text-muted-foreground">{m.confidence}%</span>
+                        </div>
+                      )}
                     </Panel>
                   ))}
                 </div>
 
                 {/* Species */}
                 <Panel className="p-4">
-                  <Label>Recommended Species</Label>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label>Recommended Species</Label>
+                    {result.apiWorkflow?.species && (
+                      <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                        <Database className="w-3 h-3" />
+                        {result.apiWorkflow.species.count} from {result.apiWorkflow.species.source}
+                        {result.apiWorkflow.species.aiSupplemented && (
+                          <span className="inline-flex items-center gap-0.5 ml-1 px-1.5 py-0.5 rounded-full font-semibold" style={{ background: 'rgba(168,85,247,0.12)', color: '#c084fc', fontSize: '9px' }}>
+                            <Bot className="w-2.5 h-2.5" /> AI
+                          </span>
+                        )}
+                      </span>
+                    )}
+                  </div>
                   <div className="space-y-3">
                     {result.recommendedSpecies.slice(0, 3).map((sp, i) => (
                       <div key={i} className="flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-foreground/5"

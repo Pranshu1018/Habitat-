@@ -13,7 +13,9 @@ import {
   Leaf,
   Activity,
   TreePine,
-  User
+  User,
+  Database,
+  Bot
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +29,12 @@ interface SiteData {
   soil: any;
   vegetation: any;
   timestamp: string;
+  apiWorkflow?: {
+    weather: { tried: string[]; succeeded: string | null; failed: string[]; filledByChatbot: boolean };
+    soil: { tried: string[]; succeeded: string | null; failed: string[]; filledByChatbot: boolean };
+    vegetation: { tried: string[]; succeeded: string | null; failed: string[]; filledByChatbot: boolean };
+    species: { source: string; count: number; aiSupplemented: boolean; databaseSpeciesCount: number };
+  };
 }
 
 const SiteAnalysis = () => {
@@ -444,6 +452,19 @@ const SiteAnalysis = () => {
                           <span className="ml-auto text-xs text-gray-400 font-normal">{siteData.weather.source}</span>
                         )}
                       </h3>
+                      {siteData.weather?.source && siteData.weather?.confidence !== undefined && (
+                        <div className="flex items-center gap-1.5 -mt-2 mb-4">
+                          <div className="w-1.5 h-1.5 rounded-full" style={{
+                            background: siteData.weather.confidence > 80 ? '#22c55e' : siteData.weather.confidence > 60 ? '#eab308' : '#ef4444'
+                          }} />
+                          <span className="text-[10px] text-gray-400">{siteData.weather.confidence}% confidence</span>
+                          {siteData.apiWorkflow?.weather?.filledByChatbot && (
+                            <span className="inline-flex items-center gap-0.5 ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-purple-50 text-purple-500">
+                              <Bot className="w-2.5 h-2.5" /> AI
+                            </span>
+                          )}
+                        </div>
+                      )}
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -496,6 +517,19 @@ const SiteAnalysis = () => {
                           <span className="ml-auto text-xs text-gray-400 font-normal">{siteData.soil.source}</span>
                         )}
                       </h3>
+                      {siteData.soil?.source && siteData.soil?.confidence !== undefined && (
+                        <div className="flex items-center gap-1.5 -mt-2 mb-4">
+                          <div className="w-1.5 h-1.5 rounded-full" style={{
+                            background: siteData.soil.confidence > 80 ? '#22c55e' : siteData.soil.confidence > 60 ? '#eab308' : '#ef4444'
+                          }} />
+                          <span className="text-[10px] text-gray-400">{siteData.soil.confidence}% confidence</span>
+                          {siteData.apiWorkflow?.soil?.filledByChatbot && (
+                            <span className="inline-flex items-center gap-0.5 ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-purple-50 text-purple-500">
+                              <Bot className="w-2.5 h-2.5" /> AI
+                            </span>
+                          )}
+                        </div>
+                      )}
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -538,6 +572,33 @@ const SiteAnalysis = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Data Source Summary */}
+                    {siteData.apiWorkflow && (
+                      <div className="bg-white rounded-2xl p-4 shadow-sm md:col-span-2">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Database className="w-4 h-4 text-emerald-600" />
+                          <span className="font-medium text-gray-700">Data from:</span>
+                          <span>
+                            {[
+                              siteData.apiWorkflow.weather?.succeeded,
+                              siteData.apiWorkflow.soil?.succeeded,
+                              siteData.apiWorkflow.vegetation?.succeeded,
+                            ].filter(Boolean).join(', ') || 'AI Generated'}
+                          </span>
+                          {siteData.apiWorkflow.species && (
+                            <span className="text-gray-400">
+                              | {siteData.apiWorkflow.species.count} species from {siteData.apiWorkflow.species.source}
+                            </span>
+                          )}
+                          {(siteData.apiWorkflow.weather?.filledByChatbot || siteData.apiWorkflow.soil?.filledByChatbot) && (
+                            <span className="inline-flex items-center gap-0.5 ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-purple-50 text-purple-500">
+                              <Bot className="w-2.5 h-2.5" /> AI Supplemented
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}

@@ -22,26 +22,55 @@ const MapView = ({ selectedRegion, onSelectRegion, simulationMode = false, regio
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [activeLayer, setActiveLayer] = useState<LayerType | null>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
+    // Validate Mapbox token
+    if (!mapboxgl.accessToken) {
+      console.error('Mapbox token is missing');
+      setMapError('Map configuration error. Please check environment variables.');
+      return;
+    }
+
+    // Check WebGL support
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) {
+      console.error('WebGL is not supported');
+      setMapError('Your browser does not support WebGL, which is required for map rendering.');
+      return;
+    }
+
     const initializeMap = () => {
       try {
         map.current = new mapboxgl.Map({
-          container: mapContainer.current,
+          container: mapContainer.current!,
           style: 'mapbox://styles/mapbox/dark-v11',
           center: [20, 5],
           zoom: 1.8,
           minZoom: 1.5,
           maxZoom: 12,
           projection: 'mercator',
+          preserveDrawingBuffer: true,
+          antialias: true,
         });
 
         map.current.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
-        map.current.on('error', (e) => { console.error('Mapbox error:', e); });
+        
+        map.current.on('error', (e) => { 
+          console.error('Mapbox error:', e); 
+          setMapError('Map rendering error occurred.');
+        });
+
+        map.current.on('load', () => {
+          console.log('Map loaded successfully');
+          setMapError(null);
+        });
       } catch (error) {
         console.error('Error initializing map:', error);
+        setMapError('Failed to initialize map. Please refresh the page.');
       }
     };
 
@@ -405,6 +434,27 @@ const MapView = ({ selectedRegion, onSelectRegion, simulationMode = false, regio
     <div className="relative flex-1 h-full">
       {/* Map Container */}
       <div ref={mapContainer} className="absolute inset-0 rounded-2xl overflow-hidden" />
+
+      {/* Error Overlay */}
+      {mapError && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute inset-0 flex items-center justify-center bg-background/95 backdrop-blur-sm rounded-2xl z-50"
+        >
+          <div className="text-center max-w-md px-6">
+            <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">Map Loading Error</h3>
+            <p className="text-sm text-muted-foreground mb-4">{mapError}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              Reload Page
+            </button>
+          </div>
+        </motion.div>
+      )}
 
       {/* Layer Controls */}
       <motion.div

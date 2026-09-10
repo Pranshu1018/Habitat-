@@ -9,8 +9,10 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 3001
+        value: 10000
       - key: OPENWEATHER_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
         sync: false
       - key: SENTINEL_CLIENT_ID
         sync: false
@@ -29,6 +31,8 @@ services:
       - key: TWILIO_AUTH_TOKEN
         sync: false
       - key: TWILIO_PHONE_NUMBER
+        sync: false
+      - key: OFFICER_PHONE_NUMBER
         sync: false
       - key: ML_SERVICE_URL
         sync: false

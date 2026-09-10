@@ -30,12 +30,18 @@ import chatbotRoutes from './routes/chatbot.js';
 
 // Log API key status
 console.log('🔑 API Keys Status:');
-console.log('  .env file:', existsSync(envPath) ? '✓ Found' : '✗ Not found');
+console.log('  .env file:', existsSync(envPath) ? '✓ Found' : '⚠️  Not found (using env vars)');
 console.log('  OpenWeather:', process.env.OPENWEATHER_API_KEY ? '✓ Loaded' : '✗ Missing');
+console.log('  Groq AI:', process.env.GROQ_API_KEY ? '✓ Loaded' : '✗ Missing');
 console.log('  Sentinel Hub:', process.env.SENTINEL_CLIENT_ID ? '✓ Loaded' : '✗ Missing');
+console.log('  Twilio SMS:', process.env.TWILIO_ACCOUNT_SID ? '✓ Loaded' : '✗ Missing');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Trust proxy - REQUIRED for Render.com, Heroku, and other hosting platforms
+// This allows express-rate-limit to work correctly behind reverse proxies
+app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet());

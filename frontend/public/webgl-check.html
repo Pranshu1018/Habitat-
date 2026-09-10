@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebGL Support Check</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #0a0a0a;
+      color: #fff;
+    }
+    .success { color: #22c55e; }
+    .error { color: #ef4444; }
+    .warning { color: #f59e0b; }
+    .info-box {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    h1 { color: #22c55e; }
+    h2 { color: #888; font-size: 18px; margin-top: 30px; }
+    pre { 
+      background: #0a0a0a; 
+      padding: 15px; 
+      border-radius: 4px; 
+      overflow-x: auto;
+      border: 1px solid #333;
+    }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .icon { font-size: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🗺️ Habitat WebGL Support Check</h1>
+  
+  <div class="info-box">
+    <p>This page checks if your browser and environment support WebGL, which is required for Mapbox GL maps.</p>
+  </div>
+
+  <h2>System Checks</h2>
+  <div id="checks"></div>
+
+  <h2>Environment Variables</h2>
+  <div id="env-vars"></div>
+
+  <h2>Browser Information</h2>
+  <div id="browser-info"></div>
+
+  <h2>Recommendations</h2>
+  <div id="recommendations"></div>
+
+  <script>
+    const checksDiv = document.getElementById('checks');
+    const envVarsDiv = document.getElementById('env-vars');
+    const browserInfoDiv = document.getElementById('browser-info');
+    const recommendationsDiv = document.getElementById('recommendations');
+    const recommendations = [];
+
+    // Check WebGL Support
+    function checkWebGL() {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      
+      if (gl) {
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        const vendor = debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : 'Unknown';
+        const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'Unknown';
+        
+        checksDiv.innerHTML += `
+          <div class="check-item">
+            <span class="icon success">✓</span>
+            <span class="success">WebGL is supported</span>
+          </div>
+          <pre>Vendor: ${vendor}\nRenderer: ${renderer}</pre>
+        `;
+        return true;
+      } else {
+        checksDiv.innerHTML += `
+          <div class="check-item">
+            <span class="icon error">✗</span>
+            <span class="error">WebGL is NOT supported</span>
+          </div>
+        `;
+        recommendations.push('Enable hardware acceleration in your browser settings');
+        recommendations.push('Update your graphics drivers');
+        recommendations.push('Try a different browser (Chrome, Firefox, or Edge)');
+        return false;
+      }
+    }
+
+    // Check Environment Variables
+    function checkEnvVars() {
+      // Note: In production builds, import.meta.env is replaced at build time
+      const hasMapboxToken = typeof window !== 'undefined';
+      
+      envVarsDiv.innerHTML = `
+        <div class="info-box">
+          <p class="warning">⚠️ Environment variables are compiled at build time with Vite.</p>
+          <p>If you see map errors, ensure <code>VITE_MAPBOX_TOKEN</code> is set in Vercel's environment variables and redeploy.</p>
+        </div>
+      `;
+    }
+
+    // Browser Info
+    function showBrowserInfo() {
+      const info = {
+        'User Agent': navigator.userAgent,
+        'Platform': navigator.platform,
+        'Language': navigator.language,
+        'Screen Resolution': `${window.screen.width}x${window.screen.height}`,
+        'Device Pixel Ratio': window.devicePixelRatio,
+        'Hardware Concurrency': navigator.hardwareConcurrency || 'Unknown',
+        'Memory': navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'Unknown'
+      };
+
+      let html = '<pre>';
+      for (const [key, value] of Object.entries(info)) {
+        html += `${key}: ${value}\n`;
+      }
+      html += '</pre>';
+      browserInfoDiv.innerHTML = html;
+    }
+
+    // Show Recommendations
+    function showRecommendations() {
+      if (recommendations.length === 0) {
+        recommendationsDiv.innerHTML = `
+          <div class="check-item">
+            <span class="icon success">✓</span>
+            <span class="success">Your system should support Mapbox GL maps!</span>
+          </div>
+        `;
+      } else {
+        let html = '<ul>';
+        recommendations.forEach(rec => {
+          html += `<li class="warning">${rec}</li>`;
+        });
+        html += '</ul>';
+        recommendationsDiv.innerHTML = html;
+      }
+    }
+
+    // Run all checks
+    checkWebGL();
+    checkEnvVars();
+    showBrowserInfo();
+    showRecommendations();
+  </script>
+</body>
+</html>

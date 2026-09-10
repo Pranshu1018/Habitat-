@@ -276,3 +276,27 @@
 .mapboxgl-popup-anchor-top .mapboxgl-popup-tip {
   border-bottom-color: hsl(var(--card)) !important;
 }
+
+/* ── Sylva 3D Hero shader frame ── */
+.shader-frame {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #383b34;
+}
+
+.shader-frame .landing-page-frame,
+.shader-frame .threeui-background {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+.shader-frame iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+}
+
