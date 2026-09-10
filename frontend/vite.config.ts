@@ -19,15 +19,18 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    chunkSizeWarningLimit: 1200,
+    chunkSizeWarningLimit: 1600,
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ["react", "react-dom", "react-router-dom"],
           threeui: ["@designcodeio/threeui"],
+          mapbox: ["mapbox-gl"],
+          firebase: ["firebase/app", "firebase/auth", "firebase/firestore"],
         },
       },
     },
   },
 }));
+
 

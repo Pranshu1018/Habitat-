@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SylvaHero } from "@designcodeio/threeui";
-import "@designcodeio/threeui/style.css";
 
 interface SceneProps {
   onDiscoverClick?: () => void;
